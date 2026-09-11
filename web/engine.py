@@ -3,12 +3,15 @@
 # imports
 
 import os
+import sys
+import functools
 import secrets
 import requests
 import discord
 import psycopg2
 import psycopg2.extras
 import user_agents
+import json
 
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from flask_talisman import Talisman
@@ -28,14 +31,22 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 SESSION_SECRET = os.getenv("SECRET_KEY")
-DEBUG_MODE = os.getenv("DEBUG_MODE")
+DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be truthy
 
 # initalize the flask app
 app = Flask(__name__)
 app.secret_key = SESSION_SECRET
 
 # initalize the security protocols
-Talisman(app)
+
+csp = {
+    'default-src': '\'self\'',
+    'script-src': ['\'self\'', 'https://jsdelivr.net', 'https://cdn.tailwindcss.com'],
+    'style-src': ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+    'font-src': ['\'self\'', 'https://fonts.gstatic.com']
+}
+
+Talisman(app, content_security_policy=csp)
 CORS(app)
 limiter = Limiter(get_remote_address, app=app, default_limits=["200 per day", "50 per hour"])
 
@@ -90,6 +101,44 @@ def confidence_level(discord_id, ip, browser, os):
         deny_access = True
     return confidence, deny_access # return the confidence level and whether to deny access or not
 
+# login_required() - decorator, redirects to the sign in page if the user is not logged in
+def login_required(f):
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'discord_id' not in session:
+            return redirect(url_for('sign_in'))
+        return f(*args, **kwargs)
+    return wrapper
+    
+# sync_skins() - sync ALL the skins in CS2 (keep the function due to updates), shoutout to bymykel.com
+def sync_skins():
+    path = os.path.join(os.path.dirname(__file__), "..", "skins.json") # skins.json is in the repo root, engine.py is in web/
+    with open(path, encoding="utf-8") as f:
+        skins = json.load(f) # list of every skin, one entry per skin (not per wear)
+
+    # one row per skin per wear, the market hash name is what steam wants
+    rows = []
+    seen = set() # doppler phases are separate entries with the same name, steam lists them as one item
+    for skin in skins:
+        weapon = (skin.get("weapon") or {}).get("name") # gloves and vanilla knives are missing some of these
+        pattern = (skin.get("pattern") or {}).get("name")
+        rarity = (skin.get("rarity") or {}).get("name")
+        for wear in skin.get("wears", []):
+            market_hash_name = f"{skin['name']} ({wear['name']})"
+            if market_hash_name in seen:
+                continue
+            seen.add(market_hash_name)
+            rows.append((market_hash_name, weapon, pattern, wear["name"], skin.get("image"), rarity))
+            
+    # sync it to the DB
+    conn = get_db()
+    cursor = conn.cursor()
+    psycopg2.extras.execute_values(cursor, "INSERT INTO skins (market_hash_name, weapon, name, wear, image_url, rarity) VALUES %s ON CONFLICT (market_hash_name) DO UPDATE SET image_url = EXCLUDED.image_url, rarity = EXCLUDED.rarity", rows) # one batch insert, the %s gets expanded into all the rows
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return len(rows)
+
 # flask routes
 
 # main route
@@ -103,6 +152,16 @@ def main():
 @limiter.limit("5 per minute")
 def sign_in():
     return render_template("sign-in.html") # render the sign in page
+
+@app.route('/tracker')
+@limiter.limit("10 per minute")
+@login_required
+def tracker():
+    return render_template("tracker.html") # render the tracker page
+
+@app.route('/denied')
+def denied():
+    return render_template("denied.html")
 
 # api routes
 
@@ -180,10 +239,11 @@ def discord_login_complete():
 
     session['discord_id'] = discord_id
 
+    # redirect instead of rendering here, a refresh on this url would resend the used oauth code
     if deny_access == True: # check if the deny access is true
-        return  render_template("denied.html") # deny access if confidence is too high
+        return redirect(url_for('denied')) # deny access if confidence is too high
     else:
-        return render_template("tracker.html", user_data=user_data) # log in successful, render the tracker page with the user's data
+        return redirect(url_for('tracker')) # log in successful
 
 # steam API routes
 
@@ -210,4 +270,8 @@ def get_skin_price(skin_name):
     
 # application runner
 if __name__ == "__main__":
+    # python engine.py --sync only syncs the skins and exits, run it after a case release
+    if "--sync" in sys.argv:
+        print(f"synced {sync_skins()} skins")
+        sys.exit()
     app.run(debug=DEBUG_MODE, host="0.0.0.0", port="6032")

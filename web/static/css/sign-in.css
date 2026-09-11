@@ -1,0 +1,52 @@
+/* card */
+.card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.45));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.discord-btn {
+    background: #fff;
+    color: #000;
+    transition: background .15s, transform .1s;
+}
+
+.discord-btn:hover {
+    background: #e5e5e5;
+}
+
+/* checkbox, the default one looks bad on dark */
+.tos {
+    appearance: none;
+    -webkit-appearance: none;
+    position: relative;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: transparent;
+    cursor: pointer;
+}
+
+.tos:checked {
+    background: #fff;
+    border-color: #fff;
+}
+
+/* the tick is just a rotated border, no image needed */
+.tos:checked::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
