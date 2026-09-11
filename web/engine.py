@@ -70,15 +70,25 @@ def confidence_level(discord_id, ip, browser, os):
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
-
+    
+    # calculate confidence level based on the number of other accounts that logged in from this same ip, browser and os
     confidence = 0
     for row in rows:
         confidence += 10
-        if row["browser"] == browser and row["os"] == os:
+        if row["ip"] == ip:
             confidence += 40
-            # more will be done later
+            if row["browser"] == browser:
+                confidence += 30
+            if row["os"] == os:
+                confidence += 20
+                
+    # calculate if the user should be denied access based on the confidence level
+    deny_access = False
+    deny_access_threshold = 75 # if the confidence level is above this threshold, deny access
 
-    return confidence # return the confidence level, this is a placeholder for now, will be implemented later
+    if confidence > deny_access_threshold:
+        deny_access = True
+    return confidence, deny_access # return the confidence level and whether to deny access or not
 
 # flask routes
 
@@ -158,10 +168,7 @@ def discord_login_complete():
     discord_id = user_data.get("id") # get the discord id from the user data
     
     # confidence level is a measure of how confident we are that the user is who they say they are, based on their username and discriminator
-    confidence = confidence_level(discord_id, real_ip, user_agent.browser.family, user_agent.os.family) # pass the discord id, ip, browser and the os to the measurement function
-
-    if confidence >= 50:
-        return jsonify({"error": "login denied, alt account suspected"}) # deny access if confidence is too high
+    confidence, deny_access = confidence_level(discord_id, real_ip, user_agent.browser.family, user_agent.os.family) # pass the discord id, ip, browser and the os to the measurement function
     
     # save it in the DB so we can use it later for notifications and more
     conn = get_db()
@@ -173,7 +180,10 @@ def discord_login_complete():
 
     session['discord_id'] = discord_id
 
-    return redirect(url_for('main'))
+    if deny_access == True: # check if the deny access is true
+        return  render_template("denied.html") # deny access if confidence is too high
+    else:
+        return render_template("tracker.html", user_data=user_data) # log in successful, render the tracker page with the user's data
 
 # steam API routes
 
