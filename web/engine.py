@@ -31,8 +31,12 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 SESSION_SECRET = os.getenv("SECRET_KEY")
-DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be truthy
+DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be 
+
+# for tracking skins
 MAX_TRACKED = 5 # max tracked skins at once
+DELETE_RATELIMIT = MAX_TRACKED * 2 # basicaly just double the max_tracked limit so we find a good ratelimit
+
 
 # initalize the flask app
 app = Flask(__name__)
@@ -367,6 +371,30 @@ def tracked_skins():
     conn.close()
 
     return jsonify({"ok": True}), 201
+
+# untrack_skin() - a DELETE route that untracks a skin
+@app.route("/api/tracked/<path:market_hash_name>", methods=["DELETE"])
+@limiter.limit(f"{DELETE_RATELIMIT} per minute")
+@login_required
+def untrack_skin():
+    # fetch the user's information (primarly discord uid)
+    discord_id = session['discord_id']
+    data = request.get_json() or {}
+    
+    # get all the item's information
+    market_hash_name = data.get("market_hash_name")
+    
+    # database logic
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tracked WHERE discord_id = %s AND marketh_hash_name = %s", (discord_id, market_hash_name)) # just delete it from the tracked table
+    if cursor.rowcount() == 0:
+        return jsonify({"error", "tracked skin not foun"}), 404 # return with a 404
+    conn.commit()
+    cursor.close()
+    conn.close()
+    
+    return jsonify({"ok": "delete successfully"})
     
 
 # application runner
