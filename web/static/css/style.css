@@ -1,0 +1,70 @@
+.poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* background - the gradients are the fallback until bg.png is in static/img */
+.bg {
+    position: fixed;
+    inset: 0;
+    background:
+        url("../img/bg.png") center / cover no-repeat,
+        radial-gradient(ellipse 30% 45% at 38% 20%, rgba(255, 255, 255, 0.12), transparent 70%),
+        radial-gradient(ellipse 45% 35% at 60% 10%, rgba(255, 255, 255, 0.07), transparent 70%),
+        #000;
+}
+
+.page {
+    min-height: calc(100vh - 88px);
+}
+
+/* navbar */
+.nav-link {
+    color: #d4d4d8;
+    transition: color .15s;
+}
+
+.nav-link:hover {
+    color: #fff;
+}
+
+.login-pill {
+    background: #5865f2;
+    box-shadow: 0 0 22px rgba(88, 101, 242, 0.55);
+    transition: background .15s, box-shadow .15s, transform .1s;
+}
+
+.login-pill:hover {
+    background: #6b76f5;
+    box-shadow: 0 0 30px rgba(88, 101, 242, 0.75);
+}
+
+/* animations */
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.rise {
+    animation: rise .5s ease-out both;
+}
+
+.rise-1 { animation-delay: .1s; }
+.rise-2 { animation-delay: .2s; }
+.rise-3 { animation-delay: .3s; }
+
+.login-pill:active,
+.discord-btn:active {
+    transform: scale(.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rise {
+        animation: none;
+    }
+}
