@@ -283,8 +283,8 @@ def discord_login_complete():
 # steam API routes
 
 # search_skins() - a GET route, fetch the user's query and search the DB for it
-@app.route("/api/skins")
-@Limiter.limit("20 per minute")
+@app.route("/api/skins", methods=["GET"])
+@limiter.limit("20 per minute")
 @login_required
 def search_skins():
     # input handling
@@ -292,7 +292,7 @@ def search_skins():
     
     # short query guard
     if len(q) < 2: # if the query is less than 2 characters, don't lookup
-        return jsonify([])
+        return jsonify([]), 400
     
     # database logic & query
     conn = get_db()
@@ -302,9 +302,72 @@ def search_skins():
     cursor.close()
     conn.close()
     
-    return jsonify(rows) # return the rows
+    return jsonify(rows), 200 # return the rows
     
+# all the tracked skins
+@app.route("/api/tracked", methods=["POST"])
+@limiter.limit("10 per minute")
+@login_required
+def tracked_skins():
+    # fetch the user's information so it can display the proper tracked items
+    discord_id = session['discord_id']
+    data = request.get_json() or {}
+    
+    # get all the item's information
+    market_hash_name = data.get("market_hash_name")
+    raw_buy = data.get("buy_below")
+    raw_sell = data.get("sell_above")
+    
+    # security checks
+    # check 1 - must havea a skin name and atleast one threshold set
+    if not market_hash_name or (raw_buy is None and raw_sell is None):
+        return jsonify({"error": "missing market_hash name or valid theresholds"}), 400 # return an error
+    
+    # check 2 - try converting non-None values with float() and reject negatives
+    buy_below = None
+    sell_above = None
+    try:
+        if raw_buy is not None:
+            buy_below = float(raw_buy)
+            if buy_below < 0:
+                return jsonify({"error": "thresholds cannot be negative"}), 400 # cannot be negative
+        if raw_sell is not None:
+            sell_above = float(raw_sell)
+            if sell_above < 0:
+                return jsonify({"error": "thresholds cannot be negative"}), 400 # cannot be negative once again
+    except (ValueError, TypeError):
+        return jsonify({"error": "theresholds must be numbers"}), 400 # if theresholds are not a number, return with a 400
+    
+    # database logic
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM skins WHERE market_hash_name = %s", (market_hash_name,)) # basically, a simple query that will just fetch the row with the correct market hash name
+    # check if it fetched
+    if not cursor.fetchone():
+        cursor.close()
+        conn.close()
+        return jsonify({"error": "skin not foun"}), 404
+    # check if the user has hit the max_tracked limit
+    cursor.execute("SELECT COUNT(*) FROM tracked WHERE discord_id = %s", (discord_id,))
+    count = cursor.fetchone()[0]
+    if count >= MAX_TRACKED:
+        cursor.close()
+        conn.close()
+        return jsonify({"error": f"limit, the user has hit their {MAX_TRACKED} (max tracked thereshold) items"}), 403
 
+    # if all tests have passed correctly, track it
+    cursor.execute("""
+        INSERT INTO tracked (discord_id, market_hash_name, buy_below, sell_above) 
+        VALUES (%s, %s, %s, %s) 
+        ON CONFLICT (discord_id, market_hash_name) 
+        DO UPDATE SET buy_below = EXCLUDED.buy_below, sell_above = EXCLUDED.sell_above
+    """, (discord_id, market_hash_name, buy_below, sell_above))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return jsonify({"ok": True}), 201
+    
 
 # application runner
 if __name__ == "__main__":
