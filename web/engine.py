@@ -31,7 +31,7 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 SESSION_SECRET = os.getenv("SECRET_KEY")
-DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be 
+DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be truthy
 
 # for tracking skins
 MAX_TRACKED = 5 # max tracked skins at once
@@ -111,6 +111,8 @@ def login_required(f):
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         if 'discord_id' not in session:
+            if request.path.startswith('/api/'):
+                return jsonify({"error": "not logged in"}), 401 # fetch() calls want json, not the sign in page
             return redirect(url_for('sign_in'))
         return f(*args, **kwargs)
     return wrapper
@@ -284,7 +286,7 @@ def discord_login_complete():
     else:
         return redirect(url_for('tracker')) # log in successful
     
-# steam API routes
+# tracker API routes
 
 # search_skins() - a GET route, fetch the user's query and search the DB for it
 @app.route("/api/skins", methods=["GET"])
@@ -301,7 +303,7 @@ def search_skins():
     # database logic & query
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT market_hash_name, weapon, name, wear, image_url, rarity FROM skins WHERE market_hash_name ILIKE %s LIMIT 25", f"%{q}%")
+    cursor.execute("SELECT market_hash_name, weapon, name, wear, image_url, rarity FROM skins WHERE market_hash_name ILIKE %s LIMIT 25", (f"%{q}%",))
     rows = cursor.fetchall()
     cursor.close()
     conn.close()
@@ -309,10 +311,40 @@ def search_skins():
     return jsonify(rows), 200 # return the rows
     
 # all the tracked skins
+@app.route("/api/tracked", methods=["GET"])
+@limiter.limit("30 per minute")
+@login_required
+def get_tracked():
+    discord_id = session['discord_id']
+
+    # join the skin info and grab the newest price for each one
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT t.market_hash_name, t.buy_below, t.sell_above, t.created_at, s.weapon, s.name, s.wear, s.image_url, s.rarity,
+            (SELECT median FROM prices p WHERE p.market_hash_name = t.market_hash_name ORDER BY fetched_at DESC LIMIT 1) AS median
+        FROM tracked t
+        JOIN skins s ON s.market_hash_name = t.market_hash_name
+        WHERE t.discord_id = %s
+        ORDER BY t.created_at
+    """, (discord_id,))
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    # jsonify chokes on Decimal
+    for row in rows:
+        for key in ("buy_below", "sell_above", "median"):
+            if row[key] is not None:
+                row[key] = float(row[key])
+
+    return jsonify(rows), 200
+
+# track_skin() - a POST route, does a few safety checks and tracks the skin if all good
 @app.route("/api/tracked", methods=["POST"])
 @limiter.limit("10 per minute")
 @login_required
-def tracked_skins():
+def track_skin():
     # fetch the user's information so it can display the proper tracked items
     discord_id = session['discord_id']
     data = request.get_json() or {}
@@ -325,7 +357,7 @@ def tracked_skins():
     # security checks
     # check 1 - must havea a skin name and atleast one threshold set
     if not market_hash_name or (raw_buy is None and raw_sell is None):
-        return jsonify({"error": "missing market_hash name or valid theresholds"}), 400 # return an error
+        return jsonify({"error": "missing market_hash_name or valid thresholds"}), 400 # return an error
     
     # check 2 - try converting non-None values with float() and reject negatives
     buy_below = None
@@ -340,7 +372,7 @@ def tracked_skins():
             if sell_above < 0:
                 return jsonify({"error": "thresholds cannot be negative"}), 400 # cannot be negative once again
     except (ValueError, TypeError):
-        return jsonify({"error": "theresholds must be numbers"}), 400 # if theresholds are not a number, return with a 400
+        return jsonify({"error": "thresholds must be numbers"}), 400 # if theresholds are not a number, return with a 400
     
     # database logic
     conn = get_db()
@@ -350,10 +382,10 @@ def tracked_skins():
     if not cursor.fetchone():
         cursor.close()
         conn.close()
-        return jsonify({"error": "skin not foun"}), 404
+        return jsonify({"error": "skin not found"}), 404
     # check if the user has hit the max_tracked limit
     cursor.execute("SELECT COUNT(*) FROM tracked WHERE discord_id = %s", (discord_id,))
-    count = cursor.fetchone()[0]
+    count = cursor.fetchone()["count"] # RealDictCursor, so no [0]
     if count >= MAX_TRACKED:
         cursor.close()
         conn.close()
@@ -376,25 +408,22 @@ def tracked_skins():
 @app.route("/api/tracked/<path:market_hash_name>", methods=["DELETE"])
 @limiter.limit(f"{DELETE_RATELIMIT} per minute")
 @login_required
-def untrack_skin():
+def untrack_skin(market_hash_name):
     # fetch the user's information (primarly discord uid)
     discord_id = session['discord_id']
-    data = request.get_json() or {}
-    
-    # get all the item's information
-    market_hash_name = data.get("market_hash_name")
     
     # database logic
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM tracked WHERE discord_id = %s AND marketh_hash_name = %s", (discord_id, market_hash_name)) # just delete it from the tracked table
-    if cursor.rowcount() == 0:
-        return jsonify({"error", "tracked skin not foun"}), 404 # return with a 404
+    cursor.execute("DELETE FROM tracked WHERE discord_id = %s AND market_hash_name = %s", (discord_id, market_hash_name)) # just delete it from the tracked table
+    deleted = cursor.rowcount
     conn.commit()
     cursor.close()
     conn.close()
+    if deleted == 0:
+        return jsonify({"error": "tracked skin not found"}), 404 # return with a 404
     
-    return jsonify({"ok": "delete successfully"})
+    return jsonify({"ok": True})
     
 
 # application runner
