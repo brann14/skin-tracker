@@ -32,6 +32,7 @@ DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 SESSION_SECRET = os.getenv("SECRET_KEY")
 DEBUG_MODE = os.getenv("DEBUG_MODE", "false").lower() == "true" # env vars are strings, "False" would be truthy
+MAX_TRACKED = 5 # max tracked skins at once
 
 # initalize the flask app
 app = Flask(__name__)
@@ -139,6 +140,41 @@ def sync_skins():
     conn.close()
     return len(rows)
 
+# fetch_steam_price() - get the median and lowest price of one skin from the steam market
+# returns (median, lowest) as floats, None if steam didnt like the name, "ratelimited" on a 429 so the loop can back off
+def fetch_steam_price(market_hash_name):
+    url = "https://steamcommunity.com/market/priceoverview/"
+    params = {
+        'country': 'US',
+        'currency': 1, # 1 = usd
+        'appid': 730,
+        'market_hash_name': market_hash_name
+    }
+    try:
+        response = requests.get(url, params=params, timeout=10) # dont set a fake browser ua, steam 429s it, the default one is fine
+    except requests.RequestException:
+        return None
+
+    if response.status_code == 429:
+        return "ratelimited"
+    if response.status_code != 200:
+        return None
+
+    data = response.json()
+    if not data.get('success'):
+        return None
+
+    # prices come back as strings like "$12.34" or "$1,234.56", median is missing on skins with barely any listings
+    def to_float(price):
+        if price is None:
+            return None
+        return float(price.replace('$', '').replace(',', ''))
+
+    median, lowest = to_float(data.get('median_price')), to_float(data.get('lowest_price'))
+    if median is None and lowest is None:
+        return None # steam says success: true even for names that dont exist, it just leaves the prices out
+    return median, lowest
+
 # flask routes
 
 # main route
@@ -168,7 +204,6 @@ def denied():
 # discord API routes
 
 # discord callback route
-
 @app.route("/api/discord/callback")
 @limiter.limit("5 per minute")
 def discord_sign_in():
@@ -244,30 +279,33 @@ def discord_login_complete():
         return redirect(url_for('denied')) # deny access if confidence is too high
     else:
         return redirect(url_for('tracker')) # log in successful
-
+    
 # steam API routes
 
-@app.route("/api/price/<skin_name>")
-@limiter.limit("10 per minute")
-def get_skin_price(skin_name):
-    # get the skin from the steam market API
-    url = "https://steamcommunity.com/market/priceoverview/"
-    params = {
-        'country': 'US',
-        'currency': 1,
-        'appid': 730,
-        'market_hash_name': skin_name
-    }
-    response = requests.get(url, params=params)
+# search_skins() - a GET route, fetch the user's query and search the DB for it
+@app.route("/api/skins")
+@Limiter.limit("20 per minute")
+@login_required
+def search_skins():
+    # input handling
+    q = request.args.get('q', '').strip() # get the user's input and strip it from any whitespaces
     
-    data = response.json() # json the response
+    # short query guard
+    if len(q) < 2: # if the query is less than 2 characters, don't lookup
+        return jsonify([])
     
-    if not data.get('success'): # if the request is unsucessful, return an error
-        return jsonify({"error": "failed to retrive the price, check the skin name and try again"})
-    else:
-        return data # return the data if success
+    # database logic & query
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT market_hash_name, weapon, name, wear, image_url, rarity FROM skins WHERE market_hash_name ILIKE %s LIMIT 25", f"%{q}%")
+    rows = cursor.fetchall()
+    cursor.close()
+    conn.close()
     
+    return jsonify(rows) # return the rows
     
+
+
 # application runner
 if __name__ == "__main__":
     # python engine.py --sync only syncs the skins and exits, run it after a case release
