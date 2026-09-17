@@ -1,0 +1,201 @@
+/* count badge next to the heading */
+.count {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #d4d4d8;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* search */
+.search-wrap {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 15px;
+    color: #71717a;
+    pointer-events: none;
+}
+
+.search {
+    width: 100%;
+    padding: 13px 16px 13px 42px;
+    border-radius: 12px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    outline: none;
+    transition: border-color .15s, background .15s;
+}
+
+.search::placeholder {
+    color: #71717a;
+}
+
+.search:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* dropdown, sits over the cards so it doesnt push them down */
+.results {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 20;
+    max-height: 320px;
+    overflow-y: auto;
+    padding: 6px;
+    border-radius: 12px;
+    background: #0a0a0a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .12s;
+}
+
+.result:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.result-thumb {
+    width: 54px;
+    height: 40px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.result-name {
+    font-size: 14px;
+}
+
+.add-btn {
+    margin-left: auto;
+    flex-shrink: 0;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #000;
+    background: #fff;
+    transition: background .15s, transform .1s;
+}
+
+.add-btn:hover {
+    background: #e5e5e5;
+}
+
+.add-btn:active {
+    transform: scale(.95);
+}
+
+/* tracked skin cards */
+.skin-card {
+    padding: 18px 20px;
+    border-radius: 14px;
+}
+
+.skin-thumb {
+    width: 76px;
+    height: 56px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #a1a1aa;
+}
+
+.field {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 9px;
+    font-size: 14px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    outline: none;
+    transition: border-color .15s;
+}
+
+.field:focus {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* the spinners look awful on dark and theyre useless here */
+.field::-webkit-outer-spin-button,
+.field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.field {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.save-btn {
+    flex-shrink: 0;
+    padding: 9px 18px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+    background: #fff;
+    transition: background .15s, transform .1s;
+}
+
+.save-btn:hover {
+    background: #e5e5e5;
+}
+
+.save-btn:active,
+.remove-btn:active {
+    transform: scale(.95);
+}
+
+.remove-btn {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    color: #a1a1aa;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    transition: color .15s, background .15s, border-color .15s, transform .1s;
+}
+
+.remove-btn:hover {
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.1);
+    border-color: rgba(255, 107, 107, 0.35);
+}
+
+.empty-state {
+    margin-top: 28px;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #71717a;
+    border: 1px dashed rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+}

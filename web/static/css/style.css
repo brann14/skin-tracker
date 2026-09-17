@@ -38,6 +38,16 @@
     box-shadow: 0 0 30px rgba(88, 101, 242, 0.75);
 }
 
+/* card */
+.card {
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.45));
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
 /* animations */
 @keyframes rise {
     from {
@@ -67,4 +77,30 @@
     .rise {
         animation: none;
     }
+}
+
+/* denied page */
+.denied-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.12);
+    border: 1px solid rgba(255, 107, 107, 0.3);
+}
+
+.back-btn {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: background .15s, transform .1s;
+}
+
+.back-btn:hover {
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.back-btn:active {
+    transform: scale(.97);
 }
