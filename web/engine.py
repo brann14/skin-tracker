@@ -46,8 +46,9 @@ app.secret_key = SESSION_SECRET
 
 csp = {
     'default-src': '\'self\'',
-    'script-src': ['\'self\'', 'https://jsdelivr.net', 'https://cdn.tailwindcss.com'],
+    'script-src': ['\'self\'', 'https://jsdelivr.net', 'https://cdn.tailwindcss.com', 'https://iconify.design'],
     'style-src': ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+    'image-src': ['\'self\'', 'https://iconify.design'],
     'font-src': ['\'self\'', 'https://fonts.gstatic.com']
 }
 
@@ -116,7 +117,30 @@ def login_required(f):
             return redirect(url_for('sign_in'))
         return f(*args, **kwargs)
     return wrapper
-    
+
+# asset() - turn a webpack entry name (e.g. "tracker.js") into its hashed /static/ url using manifest.json
+manifest_path = os.path.join(app.static_folder, "manifest.json")
+_manifest_cache = {}
+_manifest_mtime = None
+
+def asset(logical_name):
+    global _manifest_cache, _manifest_mtime
+    try:
+        mtime = os.path.getmtime(manifest_path)
+    except OSError:
+        raise RuntimeError("static/manifest.json not found, run `npm run build` in web/ first")
+
+    if mtime != _manifest_mtime: # reload only when webpack rebuilt, so `npm run watch` works without restarting flask
+        with open(manifest_path, encoding="utf-8") as f:
+            _manifest_cache = json.load(f)
+        _manifest_mtime = mtime
+
+    if logical_name not in _manifest_cache:
+        raise RuntimeError(f"Asset not found in manifest: {logical_name}")
+    return _manifest_cache[logical_name]
+
+app.jinja_env.globals['asset'] = asset # makes {{ asset('...') }} usable in every template
+
 # sync_skins() - sync ALL the skins in CS2 (keep the function due to updates), shoutout to bymykel.com
 def sync_skins():
     path = os.path.join(os.path.dirname(__file__), "..", "skins.json") # skins.json is in the repo root, engine.py is in web/
@@ -181,13 +205,23 @@ def fetch_steam_price(market_hash_name):
         return None # steam says success: true even for names that dont exist, it just leaves the prices out
     return median, lowest
 
+def get_skin_count():
+    conn = get_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM skins")
+    count = cursor.fetchone()["count"]
+    cursor.close()
+    conn.close()
+    return count
+
 # flask routes
 
 # main route
 @app.route("/")
-@limiter.limit("10 per minute")
+#@limiter.limit("10 per minute")
 def main():
-    return render_template("main.html") # render the website
+    count=get_skin_count() # get the count of skins in the DB
+    return render_template("main.html", count=count) # render the website
 
 # sign in so you can subscribe to the notifications so you are actually notified
 @app.route('/sign-in')
