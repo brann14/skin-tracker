@@ -1,28 +1,63 @@
 <!doctype html>
 <html lang="en">
-
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>skin sniper</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('stylecss.css') }}">
 </head>
+<body class="bg-[#0a0a0d] poppins">
+    <!-- navbar - navbar.js toggles the floating topbar look on scroll -->
+    <header id="navbar" class="navbar">
+        <nav class="navbar-bar">
+            <div class="navbar-content grid grid-cols-[1fr_auto_1fr] items-center">
+                <!-- left side -->
+                <a href="{{ url_for('main') }}" class="flex items-center">
+                    <iconify-icon icon="tabler:crosshair" class="text-white text-[26px] mr-2"></iconify-icon>
+                    <p class="text-white text-[15px] font-bold">skinSniper</p>
+                </a>
+                <div class="hidden sm:flex items-center">
+                    <a href="{{ url_for('main') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'main' else 'text-white/50' }}">home</a>
+                    <a href="{{ url_for('tracker') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'tracker' else 'text-white/50' }}">tracker</a>
+                    <a href="" class="px-3 py-1.5 text-[13px] font-medium text-white/50 transition duration-200 hover:text-white">account</a>
+                </div>
+                <!-- right side-->
+                <div class="flex justify-end">
+                    <a href="{{ url_for('sign_in') }}" class="bg-white text-black text-[13px] rounded-[10px] px-4 py-2 transition duration-200 hover:bg-white/90">sign in</a>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-<body class="poppins bg-black text-white min-h-screen overflow-hidden">
-    <div class="bg"></div>
+    <section id="main" class="pb-[250px] main-section text-center mt-[350px] mx-auto">
+        <div>
+            <p class="text-center mx-auto text-white text-[50px] max-w-[450px]">tracking <span class="font-bold italic">all</span> the skin prices in <span class="font-bold">counter strike 2</span></p>
+            <p class="text-white/60 text-[13px] font-light mt-4">Tracking <span class="font-bold text-white">{{ count }}</span> skins across counter strike 2</p>
+            <div class="buttons flex justify-center gap-4 mt-6">
+                <a href="{{ url_for('tracker') }}" class="bg-white text-black text-[13px] rounded-[10px] px-4 py-2 transition duration-200 hover:bg-white/90">Tracker<iconify-icon icon="tabler:search" class="ml-2 my-auto text-[14px]"></iconify-icon></a>
+            </div>
+        </div>
+    </section>
 
-    {% include "nav.html" %}
+    <footer class="p-8">
+        <div class="text-center">
+            <p class="text-white/70 text-[13px] font-light">made by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://brann.lol">brann</a></p>
+            <p class="text-white/70 text-[13px] font-light">page inspo by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://joyclen.codes">joy</a> & <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://bhoppi.ng">bhop</a></p>
+            <p class="text-white/70 text-[13px] font-light mt-1">&copy; 2026 skinSniper. source available under CC-BY-NC 4.0</p>
+        </div>
+        <div class="flex justify-center gap-4 mt-1">
+            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">terms of service</a>
+            <iconify-icon icon="tabler:point-filled" class="text-white/70 my-auto text-[8px]"></iconify-icon>
+            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">privacy policy</a>
+        </div>
+    </footer>
 
-    <!-- hero -->
-    <main class="page relative z-10 flex flex-col items-center justify-center text-center px-4">
-        <h1 class="rise text-5xl md:text-6xl font-bold tracking-tight">know when to buy, know when to sell</h1>
-        <p class="rise rise-1 mt-4 max-w-md text-neutral-400">tracks skin prices on the steam market and pings you on discord when a skin drops low enough to buy or climbs high enough to sell</p>
-        <a href="{{ url_for('sign_in') }}" class="rise rise-2 login-pill mt-8 px-7 py-3 rounded-full font-semibold">get started</a>
-    </main>
+    <script src="{{ asset('icons.js') }}"></script>
+    <script src="{{ asset('navbar.js') }}"></script>
+
 </body>
-
 </html>
