@@ -13,7 +13,6 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* navbar - full width & blurred at the very top, floating pill once you scroll (navbar.js adds .scrolled) */
 .navbar {
     position: fixed;
     top: 0;

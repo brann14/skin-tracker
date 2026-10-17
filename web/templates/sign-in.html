@@ -34,7 +34,14 @@
     </header>
 
     <section id="main" class="pb-[250px] main-section text-center mt-[350px] mx-auto">
-
+        <div class="sign-in-div bg-[#0a0a0d]/90 border border-white/10 rounded-[20px] p-8 w-[350px] mx-auto">
+            <h1 class="text-white text-[25px]">sign in</h1>
+            <p class="text-white/70 text-[13px] font-light">by signing in, you agree to our <a href="" class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline">terms of service</a> and <a href="" class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline">privacy policy</a></p>
+            <a class="sign-in-btn bg-white rounded-[10px] px-4 py-3 mt-6 flex justify-center items-center gap-2 text-center transition duration-400 hover:bg-white/90 border border-white/10" href="{{ url_for('discord_sign_in') }}">
+                <iconify-icon icon="tabler:brand-discord-filled" class="text-black text-[25px]"></iconify-icon>
+                <p class="text-black text-[15px] font-medium">continue with discord</p>
+            </a>
+        </div>
     </section>
 
     <footer class="p-8">

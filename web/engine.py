@@ -225,7 +225,7 @@ def main():
 
 # sign in so you can subscribe to the notifications so you are actually notified
 @app.route('/sign-in')
-@limiter.limit("5 per minute")
+#@limiter.limit("5 per minute")
 def sign_in():
     return render_template("sign-in.html") # render the sign in page
 
