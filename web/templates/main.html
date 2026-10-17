@@ -36,7 +36,7 @@
     <section id="main" class="pb-[250px] main-section text-center mt-[350px] mx-auto">
         <div>
             <p class="text-center mx-auto text-white text-[60px] max-w-[550px]">tracking <span class="font-bold italic">all</span> the skin prices in <span class="font-bold">counter strike 2</span></p>
-            <p class="text-white/60 text-[13px] font-light mt-4">Tracking <span class="font-bold text-white">{{ count }}</span> skins across counter strike 2</p>
+            <p class="text-white/60 text-[13px] font-light mt-4">Tracking <span class="font-bold text-white">{{ count if count is not none else 'thousands of' }}</span> skins across counter strike 2</p>
             <div class="buttons flex justify-center gap-4 mt-6">
                 <a href="{{ url_for('tracker') }}" class="bg-white text-black text-[13px] rounded-[10px] px-4 py-2 transition duration-200 hover:bg-white/90">Tracker<iconify-icon icon="tabler:search" class="ml-2 my-auto text-[14px]"></iconify-icon></a>
             </div>
@@ -50,9 +50,9 @@
             <p class="text-white/70 text-[13px] font-light mt-1">&copy; 2026 skinSniper. source available under CC-BY-NC 4.0</p>
         </div>
         <div class="flex justify-center gap-4 mt-1">
-            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">terms of service</a>
+            <a href="{{ url_for('terms') }}" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">terms of service</a>
             <iconify-icon icon="tabler:point-filled" class="text-white/70 my-auto text-[8px]"></iconify-icon>
-            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">privacy policy</a>
+            <a href="{{ url_for('privacy') }}" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">privacy policy</a>
         </div>
     </footer>
 

@@ -35,6 +35,8 @@ module.exports = {
     stylecss: './src/css/style.css',
     signincss: './src/css/sign-in.css',
     trackercss: './src/css/tracker.css',
+    privacycss: './src/css/privacy.css',
+    termscss: './src/css/terms.css',
 
     icons: './src/js/icons.mjs',
     tracker: './src/js/tracker.js',
