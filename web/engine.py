@@ -205,8 +205,13 @@ def fetch_steam_price(market_hash_name):
         return None # steam says success: true even for names that dont exist, it just leaves the prices out
     return median, lowest
 
+# get_skin_count() - how many skins are in the DB, None if the DB can't be reached so the homepage still loads
 def get_skin_count():
-    conn = get_db()
+    try:
+        conn = get_db()
+    except psycopg2.OperationalError as e:
+        print(f"get_skin_count() could not connect to the DB: {e}")
+        return None
     cursor = conn.cursor()
     cursor.execute("SELECT COUNT(*) FROM skins")
     count = cursor.fetchone()["count"]
@@ -228,6 +233,16 @@ def main():
 #@limiter.limit("5 per minute")
 def sign_in():
     return render_template("sign-in.html") # render the sign in page
+
+@app.route('/terms')
+#@limiter.limit("5 per minute")
+def terms():
+    return render_template("terms.html") # render the terms page
+
+@app.route('/privacy')
+#@limiter.limit("5 per minute")
+def privacy():
+    return render_template("privacy.html") # render the privacy page
 
 @app.route('/tracker')
 @limiter.limit("10 per minute")

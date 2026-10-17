@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>skin sniper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ asset('termscss.css') }}">
+</head>
+<body class="bg-[#0a0a0d] poppins">
+    <!-- navbar - navbar.js toggles the floating topbar look on scroll -->
+    <header id="navbar" class="navbar">
+        <nav class="navbar-bar">
+            <div class="navbar-content grid grid-cols-[1fr_auto_1fr] items-center">
+                <!-- left side -->
+                <a href="{{ url_for('main') }}" class="flex items-center">
+                    <iconify-icon icon="tabler:crosshair" class="text-white text-[26px] mr-2"></iconify-icon>
+                    <p class="text-white text-[15px] font-bold">skinSniper</p>
+                </a>
+                <div class="hidden sm:flex items-center">
+                    <a href="{{ url_for('main') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'main' else 'text-white/50' }}">home</a>
+                    <a href="{{ url_for('tracker') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'tracker' else 'text-white/50' }}">tracker</a>
+                    <a href="" class="px-3 py-1.5 text-[13px] font-medium text-white/50 transition duration-200 hover:text-white">account</a>
+                </div>
+                <!-- right side-->
+                <div class="flex justify-end">
+                    <a href="{{ url_for('sign_in') }}" class="bg-white text-black text-[13px] rounded-[10px] px-4 py-2 transition duration-200 hover:bg-white/90">sign in</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section id="main" class="pb-[250px] main-section text-center mt-[250px] mx-auto">
+        <div class="title-holder">
+            <p class="text-center mx-auto text-white text-[60px] max-w-[550px]">terms of service</p>
+            <p class="text-white/80 text-[14px] font-medium mt-4">last updated: october 17, 2026</p>
+        </div>
+        <div class="legal-description">
+            <p class="text-white/70 text-[14px] font-light mt-3 max-w-[800px] text-left mx-auto">skinSniper (skinsniper.xyz) lets you track Counter-Strike 2 skin prices and get notified when they hit a threshold you set. This policy explains what data we collect to make that work, why, and what rights you have over it under the GDPR.</p>
+        </div>
+        <div class="legal-fields max-w-[800px] mx-auto mt-6 text-left">
+            <div id="whos-responsible-for-your-data">
+                <h2 class="text-white text-[20px] font-bold">1. Who's responsible for your data</h2>
+                <p class="text-white/70 text-[14px] font-light mt-3">skinSniper is the data controller for the information below. Questions or requests go to <span class="font-medium italic">contact@skinsniper.xyz.</span></p>
+            </div>
+            <div id="what-we-collect">
+                <h2 class="text-white text-[20px] font-bold mt-6">2. What we collect</h2>
+                <ul class="list-disc text-white/70 text-[14px] font-light mt-3 ml-6">
+                    <li><span class="font-medium">Discord ID and username -</span> from Discord OAuth when you sign in. We never see your email or password.</li>
+                    <li><span class="font-medium">IP address, browser, and OS -</span> logged at sign-in to catch alt accounts; not used for anything else.</li>
+                    <li><span class="font-medium">Tracked skins and price thresholds -</span> whatever you set up in the tracker, tied to your Discord ID.</li>
+                    <li><span class="font-medium">One session cookie -</span> keeps you signed in. No analytics, no ad trackers.</li>
+                </ul>
+        </div>
+        <div id="why-we-process-it-and-on-what-basis">
+            <h2 class="text-white text-[20px] font-bold mt-6">3. Why we process it, and on what basis</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">We use this data to run your account, operate the tracker and notifications, and prevent abuse like multi-accounting. Under GDPR Art. 6, account and tracker data is processed to perform our contract with you; the sign-in security data is processed under our legitimate interest in keeping the Service abuse-free. We don't use your data for advertising and never sell it.</p>
+        </div>
+        <div id="who-we-share-it-with">
+            <h2 class="text-white text-[20px] font-bold mt-6">4. Who we share it with</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">Discord (sign-in), Supabase (database hosting), and Cloudflare (hosting/security) process data on our behalf to run the Service. We also query the Steam Community Market for public prices, but send it nothing about you. None of these get to use your data for their own purposes.</p>
+        </div>
+        <div id="how-long-we-keep-it">
+            <h2 class="text-white text-[20px] font-bold mt-6">5. How long we keep it</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">For as long as your account exists. Email us and we'll delete your Discord ID, username, tracked skins, and sign-in logs.</p>
+        </div>
+        <div id="your-rights">
+            <h2 class="text-white text-[20px] font-bold mt-6">6. Your rights</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">Under GDPR you can request access to, correction of, or deletion of your data, ask us to restrict or stop processing it, get a copy in a portable format, and complain to your local data protection authority if you think we've gotten it wrong. Reach out to <span class="font-medium italic">contact@skinsniper.com</span> for any of this.</p>
+        </div>
+        <div id="under-13s">
+            <h2 class="text-white text-[20px] font-bold mt-6">7. Under 13s</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">skinSniper isn't intended for anyone under 13 years of age. If you believe a child has given us data, let us know and we'll remove it.</p>
+        </div>
+        <div id="changes">
+            <h2 class="text-white text-[20px] font-bold mt-6">8. Changes</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">If this policy changes, we'll update the date above. Keep using skinSniper after a change and that means you're fine with the update.</p>
+        </div>
+        <div id="contact">
+            <h2 class="text-white text-[20px] font-bold mt-6">9. Contact</h2>
+            <p class="text-white/70 text-[14px] font-light mt-3">If you have any questions about this privacy policy, please contact us at <span class="font-medium italic">contact@skinsniper.xyz</span>.</p>
+        </div>
+    </section>
+
+    <footer class="p-8">
+        <div class="text-center">
+            <p class="text-white/70 text-[13px] font-light">made by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://brann.lol">brann</a></p>
+            <p class="text-white/70 text-[13px] font-light">page inspo by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://joyclen.codes">joy</a> & <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://bhoppi.ng">bhop</a></p>
+            <p class="text-white/70 text-[13px] font-light mt-1">&copy; 2026 skinSniper. source available under CC-BY-NC 4.0</p>
+        </div>
+        <div class="flex justify-center gap-4 mt-1">
+            <a href="{{ url_for('terms') }}" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">terms of service</a>
+            <iconify-icon icon="tabler:point-filled" class="text-white/70 my-auto text-[8px]"></iconify-icon>
+            <a href="{{ url_for('privacy') }}" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">privacy policy</a>
+        </div>
+    </footer>
+
+    <script src="{{ asset('icons.js') }}"></script>
+    <script src="{{ asset('navbar.js') }}"></script>
+
+</body>
+</html>
