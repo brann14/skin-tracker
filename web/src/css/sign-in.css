@@ -1,42 +1,55 @@
-.discord-btn {
-    background: #fff;
-    color: #000;
-    transition: background .15s, transform .1s;
+.poppins {
+    font-family: 'Poppins', sans-serif;
 }
 
-.discord-btn:hover {
-    background: #e5e5e5;
-}
-
-/* checkbox, the default one looks bad on dark */
-.tos {
-    appearance: none;
-    -webkit-appearance: none;
-    position: relative;
-    flex-shrink: 0;
-    width: 18px;
-    height: 18px;
-    margin-top: 2px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
+.backlight {
+    padding: 10px;
+    border-radius: 10px;
     background: transparent;
-    cursor: pointer;
+    transition: all ease 0.2s;
 }
 
-.tos:checked {
-    background: #fff;
-    border-color: #fff;
+.nav-link:hover .backlight {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-/* the tick is just a rotated border, no image needed */
-.tos:checked::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 1px;
-    width: 5px;
-    height: 10px;
-    border: solid #000;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    transition: padding 0.4s ease;
+}
+
+.navbar-bar {
+    width: 100%;
+    max-width: 100%;
+    padding: 14px 24px;
+    background: #0a0a0d;
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%); /* safari */
+    border: 1px solid transparent; /* transparent instead of none so the bar doesn't jump 1px when the border shows up */
+    border-radius: 0;
+    transition: max-width 0.4s ease, padding 0.4s ease, border-radius 0.4s ease, background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.navbar-content {
+    max-width: 940px; /* lines the logo & button up with the page content while at the top */
+    margin: 0 auto;
+}
+
+.navbar.scrolled {
+    padding-top: 12px;
+}
+
+.navbar.scrolled .navbar-bar {
+    max-width: min(760px, calc(100% - 24px)); /* never touch the screen edges on phones */
+    padding: 8px 20px 8px 20px; /* less on the right so the sign in button sits snug in the pill */
+    background: #10101099;
+    border-color: rgba(255, 255, 255, 0.08);
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
 }

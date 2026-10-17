@@ -1,41 +1,64 @@
 <!doctype html>
 <html lang="en">
-
 <head>
-    <title>sign in</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>skin sniper - sign in</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="{{ asset('stylecss.css') }}">
     <link rel="stylesheet" href="{{ asset('signincss.css') }}">
 </head>
+<body class="bg-[#0a0a0d] poppins">
+    <!-- navbar - navbar.js toggles the floating topbar look on scroll -->
+    <header id="navbar" class="navbar">
+        <nav class="navbar-bar">
+            <div class="navbar-content grid grid-cols-[1fr_auto_1fr] items-center">
+                <!-- left side -->
+                <a href="{{ url_for('main') }}" class="flex items-center">
+                    <iconify-icon icon="tabler:crosshair" class="text-white text-[26px] mr-2"></iconify-icon>
+                    <p class="text-white text-[15px] font-bold">skinSniper</p>
+                </a>
+                <div class="hidden sm:flex items-center">
+                    <a href="{{ url_for('main') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'main' else 'text-white/50' }}">home</a>
+                    <a href="{{ url_for('tracker') }}" class="px-3 py-1.5 text-[13px] font-medium transition duration-200 hover:text-white {{ 'text-white' if request.endpoint == 'tracker' else 'text-white/50' }}">tracker</a>
+                    <a href="" class="px-3 py-1.5 text-[13px] font-medium text-white/50 transition duration-200 hover:text-white">account</a>
+                </div>
+                <!-- right side-->
+                <div class="flex justify-end">
+                    <a href="{{ url_for('sign_in') }}" class="bg-white text-black text-[13px] rounded-[10px] px-4 py-2 transition duration-200 hover:bg-white/90">sign in</a>
+                </div>
+            </div>
+        </nav>
+    </header>
 
-<body class="poppins bg-black text-white min-h-screen overflow-hidden">
-    <div class="bg"></div>
-
-    {% include "nav.html" %}
-
-    <!-- sign in card -->
-    <main class="page relative z-10 flex items-center justify-center px-4">
-        <div class="card rise w-full max-w-md px-9 py-10 text-center">
-            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="" class="h-9 mx-auto mb-5">
-            <h1 class="text-3xl font-semibold">welcome back</h1>
-            <p class="mt-2 text-sm text-neutral-400">sign in with discord to continue</p>
-
-            <a href="{{ url_for('discord_sign_in') }}" class="discord-btn flex items-center justify-center gap-2.5 mt-7 py-3.5 rounded-lg font-medium">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
-                sign in with discord
+    <section id="main" class="pb-[250px] main-section text-center mt-[350px] mx-auto">
+        <div class="sign-in-div bg-[#0a0a0d]/90 border border-white/10 rounded-[20px] p-8 w-[350px] mx-auto">
+            <h1 class="text-white text-[25px]">sign in</h1>
+            <p class="text-white/70 text-[13px] font-light">by signing in, you agree to our <a href="" class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline">terms of service</a> and <a href="" class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline">privacy policy</a></p>
+            <a class="sign-in-btn bg-white rounded-[10px] px-4 py-3 mt-6 flex justify-center items-center gap-2 text-center transition duration-400 hover:bg-white/90 border border-white/10" href="{{ url_for('discord_sign_in') }}">
+                <iconify-icon icon="tabler:brand-discord-filled" class="text-black text-[25px]"></iconify-icon>
+                <p class="text-black text-[15px] font-medium">continue with discord</p>
             </a>
-
-            <label class="flex items-start gap-3 mt-6 text-left text-sm text-neutral-400 cursor-pointer">
-                <input type="checkbox" class="tos" checked>
-                <span>i agree to the <a href="#" class="text-white underline">terms of service</a> and <a href="#" class="text-white underline">privacy policy</a></span>
-            </label>
         </div>
-    </main>
-</body>
+    </section>
 
+    <footer class="p-8">
+        <div class="text-center">
+            <p class="text-white/70 text-[13px] font-light">made by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://brann.lol">brann</a></p>
+            <p class="text-white/70 text-[13px] font-light">page inspo by <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://joyclen.codes">joy</a> & <a class="text-white/90 font-medium hover:text-[#FFFFFF] text-decoration-underline" target=_blank href="https://bhoppi.ng">bhop</a></p>
+            <p class="text-white/70 text-[13px] font-light mt-1">&copy; 2026 skinSniper. source available under CC-BY-NC 4.0</p>
+        </div>
+        <div class="flex justify-center gap-4 mt-1">
+            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">terms of service</a>
+            <iconify-icon icon="tabler:point-filled" class="text-white/70 my-auto text-[8px]"></iconify-icon>
+            <a href="" class="text-white/70 font-thin text-[13px] hover:text-[#FFFFFF] transition duration-200">privacy policy</a>
+        </div>
+    </footer>
+
+    <script src="{{ asset('icons.js') }}"></script>
+    <script src="{{ asset('navbar.js') }}"></script>
+
+</body>
 </html>
